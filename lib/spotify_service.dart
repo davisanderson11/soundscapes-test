@@ -21,7 +21,7 @@ class SpotifyService {
       Uri.parse('https://accounts.spotify.com/api/token'),
       headers: {
         'Authorization':
-            'Basic ' + base64Encode(utf8.encode('$clientId:$clientSecret')),
+            'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: 'grant_type=client_credentials',

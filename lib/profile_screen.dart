@@ -4,26 +4,26 @@ import 'package:music_game/map_screen.dart';
 class ProfileScreen extends StatelessWidget {
   final List<Map<String, String>> clickedSongs;
 
-  ProfileScreen({required this.clickedSongs});
+  const ProfileScreen({required this.clickedSongs, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: clickedSongs.isEmpty
-          ? Center(child: Text('No songs collected yet.'))
+          ? const Center(child: Text('No songs collected yet.'))
           : ListView.builder(
               itemCount: clickedSongs.length,
               itemBuilder: (context, index) {
                 final song = clickedSongs[index];
                 return ListTile(
                   contentPadding:
-                      EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   leading: song['albumArt']!.isNotEmpty
                       ? Image.network(song['albumArt']!, width: 50, height: 50)
-                      : Icon(Icons.music_note, size: 50),
+                      : const Icon(Icons.music_note, size: 50),
                   title: Text(
                     song['track'] ?? 'Unknown Track',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -31,21 +31,22 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   subtitle: Text(
                     'by ${song['artist'] ?? 'Unknown Artist'}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontStyle: FontStyle.italic,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                   trailing: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.orange,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       song['quality'] ?? 'Unknown',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -65,17 +66,17 @@ class ProfileScreen extends StatelessWidget {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => MapScreen(userArtists: [])),
+                      builder: (context) => const MapScreen(userArtists: [])),
                   (Route<dynamic> route) => false,
                 );
               },
-              child: Text('Map'),
+              child: const Text('Map'),
             ),
             ElevatedButton(
               onPressed: () {
                 // Implement the Favorites button action if needed
               },
-              child: Text('Favorites'),
+              child: const Text('Favorites'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -87,7 +88,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 );
               },
-              child: Text('Profile'),
+              child: const Text('Profile'),
             ),
           ],
         ),

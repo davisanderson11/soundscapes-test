@@ -10,19 +10,19 @@ import 'dart:math';
 import 'dart:convert'; // Import this for JSON encoding/decoding
 
 class MapScreen extends StatefulWidget {
-  List<String> userArtists;
+  final List<String> userArtists;
 
-  MapScreen({required this.userArtists});
+  const MapScreen({required this.userArtists, super.key});
 
   @override
-  _MapScreenState createState() => _MapScreenState();
+  State<MapScreen> createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> {
   final SpotifyService _spotifyService = SpotifyService();
   List<Map<String, String>> _clickedSongs = [];
   List<Marker>? _markers;
-  MapController _mapController = MapController();
+  final MapController _mapController = MapController();
 
   late BuildContext _parentContext;
 
@@ -60,18 +60,13 @@ class _MapScreenState extends State<MapScreen> {
 
       markers.add(
         Marker(
-          width: 80.0,
-          height: 80.0,
+          width: 80,
+          height: 80,
           point: randomPoint,
           builder: (ctx) => GestureDetector(
             onTap: () => _onMarkerTapped(isSpecialDrop),
-            child: Container(
-              child: Icon(
-                isSpecialDrop ? Icons.star : Icons.music_note,
-                color: isSpecialDrop ? Colors.purple : Colors.blue,
-                size: 40,
-              ),
-            ),
+            child: Icon(isSpecialDrop ? Icons.star : Icons.music_note,
+                color: isSpecialDrop ? Colors.purple : Colors.blue, size: 40),
           ),
         ),
       );
@@ -100,7 +95,7 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      _showPermissionDialog(context);
+      if (context.mounted) _showPermissionDialog(context);
       throw Exception(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
@@ -116,19 +111,19 @@ class _MapScreenState extends State<MapScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Location Permission Required"),
-          content: Text(
+          title: const Text("Location Permission Required"),
+          content: const Text(
               "Location permissions are permanently denied. Please enable them in the app settings."),
           actions: <Widget>[
             TextButton(
-              child: Text("Open Settings"),
+              child: const Text("Open Settings"),
               onPressed: () {
                 Navigator.of(context).pop();
                 Geolocator.openAppSettings();
               },
             ),
             TextButton(
-              child: Text("Cancel"),
+              child: const Text("Cancel"),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -172,7 +167,7 @@ class _MapScreenState extends State<MapScreen> {
     final randomAlbum =
         await _spotifyService.fetchRandomAlbumAndCacheNext(widget.userArtists);
 
-    // Display the album details in a dialog
+    if (!mounted) return;
     showDialog(
       context: _parentContext,
       builder: (context) => AlertDialog(
@@ -193,7 +188,7 @@ class _MapScreenState extends State<MapScreen> {
         ),
         actions: <Widget>[
           TextButton(
-            child: Text('Close'),
+            child: const Text('Close'),
             onPressed: () {
               Navigator.of(_parentContext).pop();
             },
@@ -212,7 +207,7 @@ class _MapScreenState extends State<MapScreen> {
     // Show loading indicator
     showDialog(
       context: _parentContext,
-      builder: (context) => Center(child: CircularProgressIndicator()),
+      builder: (context) => const Center(child: CircularProgressIndicator()),
       barrierDismissible: false,
     );
 
@@ -253,7 +248,7 @@ class _MapScreenState extends State<MapScreen> {
         case 'Master':
           return Colors.black;
         default:
-          return Colors.grey; // Fallback color
+          return Colors.grey;
       }
     }
 
@@ -262,11 +257,10 @@ class _MapScreenState extends State<MapScreen> {
       context: _parentContext,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.black,
-        contentPadding: EdgeInsets.all(16.0),
-        content: Container(
+        contentPadding: const EdgeInsets.all(16),
+        content: SizedBox(
           width: 300,
-          height:
-              300, // Set the height and width to be equal to make it a square
+          height: 300,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -276,18 +270,18 @@ class _MapScreenState extends State<MapScreen> {
                   width: 150,
                   height: 150,
                   errorBuilder: (context, error, stackTrace) {
-                    return Icon(
+                    return const Icon(
                       Icons.broken_image,
                       size: 150,
                       color: Colors.grey,
                     );
                   },
                 ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(
                 '${randomSong['track']}',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -296,14 +290,14 @@ class _MapScreenState extends State<MapScreen> {
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               GestureDetector(
                 onTap: () {
                   if (randomSong['artistId'] != null) {
                     _navigateToArtistInfo(randomSong['artistId']!);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                           content: Text('Artist information not available')),
                     );
                   }
@@ -311,7 +305,7 @@ class _MapScreenState extends State<MapScreen> {
                 child: Text(
                   'by ${randomSong['artist'] ?? 'Unknown Artist'}',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     color: Colors.blue,
                     fontStyle: FontStyle.italic,
@@ -322,16 +316,17 @@ class _MapScreenState extends State<MapScreen> {
                   maxLines: 1,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: getQualityColor(randomSong['quality']!),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   randomSong['quality']!,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -343,7 +338,7 @@ class _MapScreenState extends State<MapScreen> {
         ),
         actions: <Widget>[
           TextButton(
-            child: Text(
+            child: const Text(
               'Close',
               style: TextStyle(
                 color: Colors.white,
@@ -371,7 +366,7 @@ class _MapScreenState extends State<MapScreen> {
   void _resetMapZoom() {
     LatLngBounds bounds = _getBoundsForMarkers(_markers!);
     _mapController.fitBounds(bounds,
-        options: FitBoundsOptions(padding: EdgeInsets.all(20.0)));
+        options: const FitBoundsOptions(padding: EdgeInsets.all(20)));
   }
 
   void _showFavoritesDialog() async {
@@ -380,6 +375,7 @@ class _MapScreenState extends State<MapScreen> {
     final controllers =
         List.generate(5, (i) => TextEditingController(text: artists[i]));
 
+    if (!mounted) return;
     await showDialog(
       context: _parentContext,
       builder: (context) {
@@ -404,7 +400,7 @@ class _MapScreenState extends State<MapScreen> {
                   final artists =
                       controllers.map((controller) => controller.text).toList();
                   prefs.setStringList('user_artists', artists);
-                  widget.userArtists = artists;
+                  widget.userArtists.replaceRange(0, 5, artists);
                 });
                 Navigator.of(_parentContext).pop();
               },
@@ -423,22 +419,21 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       body: _markers == null
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
                 FlutterMap(
                   mapController: _mapController,
                   options: MapOptions(
-                    bounds: _getBoundsForMarkers(
-                        _markers!), // Ensure all markers are visible
+                    bounds: _getBoundsForMarkers(_markers!),
                     boundsOptions:
-                        FitBoundsOptions(padding: EdgeInsets.all(20.0)),
+                        const FitBoundsOptions(padding: EdgeInsets.all(20)),
                   ),
                   children: [
                     TileLayer(
                       urlTemplate:
                           "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-                      subdomains: ['a', 'b', 'c'],
+                      subdomains: const ['a', 'b', 'c'],
                     ),
                     MarkerLayer(markers: _markers!),
                   ],
@@ -450,14 +445,14 @@ class _MapScreenState extends State<MapScreen> {
                     mini: true,
                     backgroundColor: Colors.white,
                     onPressed: _resetMapZoom,
-                    child: Icon(Icons.zoom_out_map, color: Colors.blue),
+                    child: const Icon(Icons.zoom_out_map, color: Colors.blue),
                   ),
                 ),
               ],
             ),
       bottomNavigationBar: Container(
         color: Colors.black,
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -471,11 +466,11 @@ class _MapScreenState extends State<MapScreen> {
                   (Route<dynamic> route) => false,
                 );
               },
-              child: Text('Map'),
+              child: const Text('Map'),
             ),
             ElevatedButton(
               onPressed: _showFavoritesDialog,
-              child: Text('Favorites'),
+              child: const Text('Favorites'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -487,7 +482,7 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                 );
               },
-              child: Text('Profile'),
+              child: const Text('Profile'),
             ),
           ],
         ),

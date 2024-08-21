@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:music_game/spotify_service.dart';
 import 'package:music_game/map_screen.dart';
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
@@ -26,7 +27,7 @@ class _MyAppState extends State<MyApp> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Enter 5 Favorite Artists"),
+          title: const Text("Enter 5 Favorite Artists"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: List.generate(
@@ -46,7 +47,7 @@ class _MyAppState extends State<MyApp> {
                 });
                 Navigator.of(context).pop();
               },
-              child: Text('Submit'),
+              child: const Text('Submit'),
             ),
           ],
         );

@@ -4,10 +4,10 @@ import 'package:music_game/spotify_service.dart';
 class ArtistInfoScreen extends StatefulWidget {
   final String artistId;
 
-  ArtistInfoScreen({required this.artistId});
+  const ArtistInfoScreen({required this.artistId, super.key});
 
   @override
-  _ArtistInfoScreenState createState() => _ArtistInfoScreenState();
+  State<ArtistInfoScreen> createState() => _ArtistInfoScreenState();
 }
 
 class _ArtistInfoScreenState extends State<ArtistInfoScreen> {
@@ -26,7 +26,7 @@ class _ArtistInfoScreenState extends State<ArtistInfoScreen> {
     try {
       _artistInfo =
           await _spotifyService.fetchArtistInfo(widget.artistId).timeout(
-        Duration(seconds: 60),
+        const Duration(seconds: 60),
         onTimeout: () {
           throw Exception('Request timed out');
         },
@@ -39,8 +39,8 @@ class _ArtistInfoScreenState extends State<ArtistInfoScreen> {
         _errorMessage = e.toString();
         _isLoading = false;
       });
-      Future.delayed(Duration(seconds: 2), () {
-        Navigator.pop(context);
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) Navigator.pop(context);
       });
     }
   }
@@ -49,10 +49,10 @@ class _ArtistInfoScreenState extends State<ArtistInfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Artist Information'),
+        title: const Text('Artist Information'),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
               ? Center(child: Text(_errorMessage!))
               : Padding(
@@ -61,24 +61,24 @@ class _ArtistInfoScreenState extends State<ArtistInfoScreen> {
                     children: [
                       _artistInfo!['image']!.isNotEmpty
                           ? Image.network(_artistInfo!['image']!)
-                          : SizedBox.shrink(),
-                      SizedBox(height: 20),
+                          : const SizedBox.shrink(),
+                      const SizedBox(height: 20),
                       Text(
                         _artistInfo!['name']!,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Text(
                         'Followers: ${_artistInfo!['followers']}',
-                        style: TextStyle(fontSize: 18),
+                        style: const TextStyle(fontSize: 18),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Text(
                         'Genres: ${_artistInfo!['genres']}',
-                        style: TextStyle(fontSize: 18),
+                        style: const TextStyle(fontSize: 18),
                       ),
                     ],
                   ),
