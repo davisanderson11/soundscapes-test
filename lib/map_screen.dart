@@ -10,7 +10,7 @@ import 'dart:math';
 import 'dart:convert'; // Import this for JSON encoding/decoding
 
 class MapScreen extends StatefulWidget {
-  final List<String> userArtists;
+  List<String> userArtists;
 
   MapScreen({required this.userArtists});
 
@@ -375,36 +375,40 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _showFavoritesDialog() async {
-    final List<TextEditingController> controllers =
-        List.generate(5, (_) => TextEditingController());
+    final prefs = await SharedPreferences.getInstance();
+    final artists = prefs.getStringList('user_artists') ?? [];
+    final controllers =
+        List.generate(5, (i) => TextEditingController(text: artists[i]));
 
     await showDialog(
       context: _parentContext,
       builder: (context) {
         return AlertDialog(
-          title: Text("Enter 5 Favorite Artists"),
+          title: const Text("Your five favorite artists"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: List.generate(
               5,
-              (index) => TextField(
-                controller: controllers[index],
-                decoration: InputDecoration(labelText: 'Artist ${index + 1}'),
-              ),
+              (index) {
+                return TextFormField(
+                    controller: controllers[index],
+                    decoration:
+                        InputDecoration(labelText: 'Artist ${index + 1}'));
+              },
             ),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 setState(() {
-                  widget.userArtists.clear();
-                  widget.userArtists.addAll(
-                    controllers.map((controller) => controller.text).toList(),
-                  );
+                  final artists =
+                      controllers.map((controller) => controller.text).toList();
+                  prefs.setStringList('user_artists', artists);
+                  widget.userArtists = artists;
                 });
                 Navigator.of(_parentContext).pop();
               },
-              child: Text('Submit'),
+              child: const Text('Submit'),
             ),
           ],
         );
