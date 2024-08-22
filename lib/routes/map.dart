@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:music_game/spotify_service.dart';
 import 'package:music_game/artist_info_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'dart:math';
 import 'dart:convert';
 
@@ -72,8 +73,11 @@ class _MapScreenState extends State<MapScreen> {
           point: randomPoint,
           child: GestureDetector(
             onTap: () => _onMarkerTapped(isSpecialDrop),
-            child: Icon(isSpecialDrop ? Icons.star : Icons.music_note,
-                color: isSpecialDrop ? Colors.purple : Colors.blue, size: 40),
+            child: Opacity(
+                opacity: 0.7,
+                child: Icon(isSpecialDrop ? Icons.star : Icons.music_note,
+                    color: isSpecialDrop ? Colors.purple : Colors.blue,
+                    size: 40)),
           ),
         ),
       );
@@ -417,8 +421,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     // Save the parent context
     _parentContext = context;
-    final theme =
-        Theme.of(context).brightness == Brightness.light ? 'light' : 'dark';
+    final theme = Theme.of(context).brightness.name;
 
     return _markers == null
         ? const Center(child: CircularProgressIndicator())
@@ -437,8 +440,15 @@ class _MapScreenState extends State<MapScreen> {
                     urlTemplate:
                         "https://{s}.basemaps.cartocdn.com/${theme}_all/{z}/{x}/{y}{r}.png",
                     subdomains: const ['a', 'b', 'c'],
+                    retinaMode: RetinaMode.isHighDensity(context),
                   ),
                   MarkerLayer(markers: _markers!),
+                  CurrentLocationLayer(
+                      style: LocationMarkerStyle(
+                          headingSectorColor: Colors.red,
+                          headingSectorRadius: 120,
+                          marker: DefaultLocationMarker(
+                              color: Colors.blue.shade900)))
                 ],
               ),
               Positioned(
