@@ -70,7 +70,7 @@ class _MapScreenState extends State<MapScreen> {
           width: 80,
           height: 80,
           point: randomPoint,
-          builder: (ctx) => GestureDetector(
+          child: GestureDetector(
             onTap: () => _onMarkerTapped(isSpecialDrop),
             child: Icon(isSpecialDrop ? Icons.star : Icons.music_note,
                 color: isSpecialDrop ? Colors.purple : Colors.blue, size: 40),
@@ -107,9 +107,7 @@ class _MapScreenState extends State<MapScreen> {
           'Location permissions are permanently denied, we cannot request permissions.');
     }
 
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-
+    Position position = await Geolocator.getCurrentPosition();
     return LatLng(position.latitude, position.longitude);
   }
 
@@ -372,8 +370,8 @@ class _MapScreenState extends State<MapScreen> {
 
   void _resetMapZoom() {
     LatLngBounds bounds = _getBoundsForMarkers(_markers!);
-    _mapController.fitBounds(bounds,
-        options: const FitBoundsOptions(padding: EdgeInsets.all(20)));
+    _mapController.fitCamera(
+        CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(20)));
   }
 
   void _showFavoritesDialog() async {
@@ -429,9 +427,10 @@ class _MapScreenState extends State<MapScreen> {
               FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
-                  bounds: _getBoundsForMarkers(_markers!),
-                  boundsOptions:
-                      const FitBoundsOptions(padding: EdgeInsets.all(20)),
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  initialCameraFit: CameraFit.bounds(
+                      bounds: _getBoundsForMarkers(_markers!),
+                      padding: const EdgeInsets.all(20)),
                 ),
                 children: [
                   TileLayer(
