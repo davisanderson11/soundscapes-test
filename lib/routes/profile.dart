@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:music_game/map_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
-  final List<Map<String, String>> clickedSongs;
+  final List<Map<String, String>> clickedSongs = const [];
 
-  const ProfileScreen({required this.clickedSongs, super.key});
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -55,44 +54,6 @@ class ProfileScreen extends StatelessWidget {
                 );
               },
             ),
-      bottomNavigationBar: Container(
-        color: Colors.grey,
-        padding: const EdgeInsets.all(20.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const MapScreen(userArtists: [])),
-                  (Route<dynamic> route) => false,
-                );
-              },
-              child: const Text('Map'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Implement the Favorites button action if needed
-              },
-              child: const Text('Favorites'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        ProfileScreen(clickedSongs: clickedSongs),
-                  ),
-                );
-              },
-              child: const Text('Profile'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

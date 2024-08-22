@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class SpotifyService {
@@ -189,7 +190,7 @@ class SpotifyService {
     }
   }
 
-  Future<Map<String, String>> fetchRandomSongFromAlbum(String albumId) async {
+  Future<Song> fetchRandomSongFromAlbum(String albumId) async {
     final token = await _getAccessToken();
 
     final albumResponse = await http.get(
@@ -215,23 +216,60 @@ class SpotifyService {
       final randomQuality =
           commonQualities[Random().nextInt(commonQualities.length)];
 
-      return {
-        'artistId': artistId,
-        'artist': artistName,
-        'track': trackName,
-        'albumArt': albumArtUrl,
-        'quality': randomQuality,
-        'albumName': albumName,
-      };
+      return Song(
+        artistId: artistId,
+        artist: artistName,
+        track: trackName,
+        albumArt: albumArtUrl,
+        quality: randomQuality,
+        albumName: albumName,
+      );
+    } else {
+      return Song(
+        artistId: '',
+        artist: 'Unknown Artist',
+        track: 'No song found',
+        albumArt: '',
+        quality: 'Unknown',
+        albumName: 'Unknown Album',
+      );
     }
+  }
+}
 
-    return {
-      'artistId': '',
-      'artist': 'Unknown Artist',
-      'track': 'No song found',
-      'albumArt': '',
-      'quality': 'Unknown',
-      'albumName': 'Unknown Album',
-    };
+@immutable
+class Song {
+  String artistId;
+  String artist;
+  String track;
+  String albumArt;
+  String quality;
+  String albumName;
+
+  Song(
+      {required this.artistId,
+      required this.artist,
+      required this.track,
+      required this.albumArt,
+      required this.quality,
+      required this.albumName});
+
+  Song.fromJson(Map<String, dynamic> json)
+      : artistId = json['artistId'],
+        artist = json['artist'],
+        track = json['track'],
+        albumArt = json['albumArt'],
+        quality = json['quality'],
+        albumName = json['albumName'];
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    data['artistId'] = artistId;
+    data['artist'] = artist;
+    data['track'] = track;
+    data['albumArt'] = albumArt;
+    data['quality'] = quality;
+    data['albumName'] = albumName;
+    return data;
   }
 }

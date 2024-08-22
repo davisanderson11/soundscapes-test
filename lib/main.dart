@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:music_game/my_app.dart';
+import 'package:music_game/app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MaterialApp(home: MyApp()));
+  runApp(MaterialApp(
+      home: const MyApp(),
+      themeMode: ThemeMode.system,
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      debugShowCheckedModeBanner: false));
 }

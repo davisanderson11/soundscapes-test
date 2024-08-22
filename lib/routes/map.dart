@@ -3,16 +3,13 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:music_game/spotify_service.dart';
-import 'package:music_game/profile_screen.dart';
-import 'package:music_game/artist_info_screen.dart'; // Add this import
+import 'package:music_game/artist_info_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
-import 'dart:convert'; // Import this for JSON encoding/decoding
+import 'dart:convert';
 
 class MapScreen extends StatefulWidget {
-  final List<String> userArtists;
-
-  const MapScreen({required this.userArtists, super.key});
+  const MapScreen({super.key});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -20,9 +17,10 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final SpotifyService _spotifyService = SpotifyService();
-  List<Map<String, String>> _clickedSongs = [];
+  List<Song> _songCollection = [];
   List<Marker>? _markers;
   final MapController _mapController = MapController();
+  List<String> userArtists = [];
 
   late BuildContext _parentContext;
 
@@ -30,30 +28,39 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _initializeMarkers();
-    _loadClickedSongs(); // Load songs from storage when the app starts
+    _loadSongCollection();
+    _loadUserArtists();
   }
 
-  Future<void> _loadClickedSongs() async {
+  Future<void> _loadUserArtists() async {
     final prefs = await SharedPreferences.getInstance();
-    final clickedSongsString = prefs.getString('clicked_songs');
-    if (clickedSongsString != null) {
+    setState(() => userArtists = prefs.getStringList('user_artists') ?? []);
+  }
+
+  Future<void> _loadSongCollection() async {
+    final prefs = await SharedPreferences.getInstance();
+    final songCollectionStrings = prefs.getStringList('song_collection');
+    // print(clickedSongsString);
+    if (songCollectionStrings != null) {
       setState(() {
-        _clickedSongs =
-            List<Map<String, String>>.from(json.decode(clickedSongsString));
+        _songCollection = songCollectionStrings
+            .map((str) => Song.fromJson(json.decode(str)))
+            .toList();
       });
     }
   }
 
-  Future<void> _saveClickedSongs() async {
+  Future<void> _saveSongCollection() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('clicked_songs', json.encode(_clickedSongs));
+    await prefs.setStringList('song_collection',
+        _songCollection.map((song) => json.encode(song.toJson())).toList());
   }
 
   Future<void> _initializeMarkers() async {
     LatLng userLocation = await _getCurrentLocation(context);
     List<Marker> markers = [];
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 20; i++) {
       LatLng randomPoint = getRandomLatLng(userLocation, 0.01);
       final isSpecialDrop =
           Random().nextDouble() < 0.10; // 10% chance for special drop
@@ -165,7 +172,7 @@ class _MapScreenState extends State<MapScreen> {
 
   void _onMarkerTapped(bool isSpecialDrop) async {
     final randomAlbum =
-        await _spotifyService.fetchRandomAlbumAndCacheNext(widget.userArtists);
+        await _spotifyService.fetchRandomAlbumAndCacheNext(userArtists);
 
     if (!mounted) return;
     showDialog(
@@ -190,7 +197,7 @@ class _MapScreenState extends State<MapScreen> {
           TextButton(
             child: const Text('Close'),
             onPressed: () {
-              Navigator.of(_parentContext).pop();
+              Navigator.of(context).pop();
             },
           ),
         ],
@@ -219,16 +226,14 @@ class _MapScreenState extends State<MapScreen> {
     // Close the loading indicator
     Navigator.of(_parentContext).pop();
 
-    if (!mounted) return;
-
     // Add the song to the list of clicked songs
     setState(() {
-      _clickedSongs.insert(0, randomSong); // Add newest song at the top
-      _saveClickedSongs(); // Save the updated list to local storage
+      _songCollection.insert(0, randomSong);
+      _saveSongCollection();
     });
 
     // Use the album art from the returned data
-    String albumArt = randomSong['albumArt'] ?? '';
+    String albumArt = randomSong.albumArt;
 
     // Determine the color based on the quality
     Color getQualityColor(String quality) {
@@ -279,7 +284,7 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               const SizedBox(height: 10),
               Text(
-                '${randomSong['track']}',
+                randomSong.track,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 22,
@@ -293,8 +298,9 @@ class _MapScreenState extends State<MapScreen> {
               const SizedBox(height: 5),
               GestureDetector(
                 onTap: () {
-                  if (randomSong['artistId'] != null) {
-                    _navigateToArtistInfo(randomSong['artistId']!);
+                  // FIXME
+                  if (randomSong.artistId != null) {
+                    _navigateToArtistInfo(randomSong.artistId);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -303,7 +309,8 @@ class _MapScreenState extends State<MapScreen> {
                   }
                 },
                 child: Text(
-                  'by ${randomSong['artist'] ?? 'Unknown Artist'}',
+                  // FIXME
+                  'by ${randomSong.artist ?? 'Unknown Artist'}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 18,
@@ -321,11 +328,11 @@ class _MapScreenState extends State<MapScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: getQualityColor(randomSong['quality']!),
+                  color: getQualityColor(randomSong.quality),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  randomSong['quality']!,
+                  randomSong.quality,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -370,10 +377,9 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _showFavoritesDialog() async {
-    final prefs = await SharedPreferences.getInstance();
-    final artists = prefs.getStringList('user_artists') ?? [];
     final controllers =
-        List.generate(5, (i) => TextEditingController(text: artists[i]));
+        List.generate(5, (i) => TextEditingController(text: userArtists[i]));
+    final prefs = await SharedPreferences.getInstance();
 
     if (!mounted) return;
     await showDialog(
@@ -396,13 +402,10 @@ class _MapScreenState extends State<MapScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                setState(() {
-                  final artists =
-                      controllers.map((controller) => controller.text).toList();
-                  prefs.setStringList('user_artists', artists);
-                  widget.userArtists.replaceRange(0, 5, artists);
-                });
-                Navigator.of(_parentContext).pop();
+                final artists = controllers.map((ctrl) => ctrl.text).toList();
+                prefs.setStringList('user_artists', artists);
+                setState(() => userArtists = artists);
+                Navigator.of(context).pop();
               },
               child: const Text('Submit'),
             ),
@@ -416,77 +419,39 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     // Save the parent context
     _parentContext = context;
+    final theme =
+        Theme.of(context).brightness == Brightness.light ? 'light' : 'dark';
 
-    return Scaffold(
-      body: _markers == null
-          ? const Center(child: CircularProgressIndicator())
-          : Stack(
-              children: [
-                FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    bounds: _getBoundsForMarkers(_markers!),
-                    boundsOptions:
-                        const FitBoundsOptions(padding: EdgeInsets.all(20)),
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-                      subdomains: const ['a', 'b', 'c'],
-                    ),
-                    MarkerLayer(markers: _markers!),
-                  ],
+    return _markers == null
+        ? const Center(child: CircularProgressIndicator())
+        : Stack(
+            children: [
+              FlutterMap(
+                mapController: _mapController,
+                options: MapOptions(
+                  bounds: _getBoundsForMarkers(_markers!),
+                  boundsOptions:
+                      const FitBoundsOptions(padding: EdgeInsets.all(20)),
                 ),
-                Positioned(
-                  bottom: 80, // Adjust to position above the Map button
-                  left: 20,
-                  child: FloatingActionButton(
-                    mini: true,
-                    backgroundColor: Colors.white,
-                    onPressed: _resetMapZoom,
-                    child: const Icon(Icons.zoom_out_map, color: Colors.blue),
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        "https://{s}.basemaps.cartocdn.com/${theme}_all/{z}/{x}/{y}{r}.png",
+                    subdomains: const ['a', 'b', 'c'],
                   ),
+                  MarkerLayer(markers: _markers!),
+                ],
+              ),
+              Positioned(
+                bottom: 20,
+                left: 20,
+                child: FloatingActionButton(
+                  mini: true,
+                  onPressed: _showFavoritesDialog,
+                  child: const Icon(Icons.star /*, color: Colors.blue*/),
                 ),
-              ],
-            ),
-      bottomNavigationBar: Container(
-        color: Colors.black,
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          MapScreen(userArtists: widget.userArtists)),
-                  (Route<dynamic> route) => false,
-                );
-              },
-              child: const Text('Map'),
-            ),
-            ElevatedButton(
-              onPressed: _showFavoritesDialog,
-              child: const Text('Favorites'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        ProfileScreen(clickedSongs: _clickedSongs),
-                  ),
-                );
-              },
-              child: const Text('Profile'),
-            ),
-          ],
-        ),
-      ),
-    );
+              ),
+            ],
+          );
   }
 }
