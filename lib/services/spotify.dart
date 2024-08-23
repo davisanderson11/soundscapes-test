@@ -54,7 +54,7 @@ class SpotifyService {
 
   Future<Map<String, String>> _fetchRandomArtistAndAlbum(
       String token, List<String> userArtists) async {
-    bool chooseFavorite = Random().nextDouble() < 0.10; // 10% chance
+    bool chooseFavorite = Random().nextDouble() < .10; // 10%
     String artistId, artistName;
 
     if (chooseFavorite && userArtists.isNotEmpty) {
