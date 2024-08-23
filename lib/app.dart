@@ -21,7 +21,8 @@ class _MyAppState extends State<MyApp> {
           destinations: const <Widget>[
             NavigationDestination(icon: Icon(Icons.map), label: 'Map'),
             NavigationDestination(icon: Icon(Icons.handshake), label: 'Trade'),
-            NavigationDestination(icon: Icon(Icons.person), label: 'Profile')
+            NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+            NavigationDestination(icon: Icon(Icons.album), label: 'Collection'),
           ],
           selectedIndex: _currentTabIndex,
           onDestinationSelected: (int index) {
@@ -38,6 +39,8 @@ class _MyAppState extends State<MyApp> {
               case 2:
                 _navigatorKey.currentState?.pushNamed('/profile');
                 break;
+              case 3:
+                _navigatorKey.currentState?.pushNamed('/collection');
             }
           }),
       body: PopScope(
