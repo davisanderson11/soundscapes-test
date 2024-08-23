@@ -62,22 +62,20 @@ class _MapScreenState extends State<MapScreen> {
     List<Marker> markers = [];
 
     for (int i = 0; i < 20; i++) {
-      LatLng randomPoint = getRandomLatLng(userLocation, 0.01);
-      final isSpecialDrop =
-          Random().nextDouble() < 0.10; // 10% chance for special drop
+      final point = _getRandomLatLng(userLocation, 0.01);
+      final special = Random().nextDouble() < .10; // 10%
 
       markers.add(
         Marker(
-          width: 80,
-          height: 80,
-          point: randomPoint,
+          width: 40,
+          height: 40,
+          point: point,
           child: GestureDetector(
-            onTap: () => _onMarkerTapped(isSpecialDrop),
+            onTap: () => _onMarkerTapped(special),
             child: Opacity(
                 opacity: 0.7,
-                child: Icon(isSpecialDrop ? Icons.star : Icons.music_note,
-                    color: isSpecialDrop ? Colors.purple : Colors.blue,
-                    size: 40)),
+                child: Icon(special ? Icons.star : Icons.music_note,
+                    color: special ? Colors.purple : Colors.blue, size: 40)),
           ),
         ),
       );
@@ -103,9 +101,7 @@ class _MapScreenState extends State<MapScreen> {
       if (permission == LocationPermission.denied) {
         throw Exception('Location permissions are denied');
       }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
+    } else if (permission == LocationPermission.deniedForever) {
       if (context.mounted) _showPermissionDialog(context);
       throw Exception(
           'Location permissions are permanently denied, we cannot request permissions.');
@@ -143,7 +139,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  LatLng getRandomLatLng(LatLng center, double offset) {
+  LatLng _getRandomLatLng(LatLng center, double offset) {
     final random = Random();
     final lat = center.latitude + (random.nextDouble() * (offset * 2) - offset);
     final lng =
@@ -152,24 +148,11 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   LatLngBounds _getBoundsForMarkers(List<Marker> markers) {
-    double? minLat, maxLat, minLng, maxLng;
-
-    for (var marker in markers) {
-      if (minLat == null || marker.point.latitude < minLat) {
-        minLat = marker.point.latitude;
-      }
-      if (maxLat == null || marker.point.latitude > maxLat) {
-        maxLat = marker.point.latitude;
-      }
-      if (minLng == null || marker.point.longitude < minLng) {
-        minLng = marker.point.longitude;
-      }
-      if (maxLng == null || marker.point.longitude > maxLng) {
-        maxLng = marker.point.longitude;
-      }
-    }
-
-    return LatLngBounds(LatLng(minLat!, minLng!), LatLng(maxLat!, maxLng!));
+    var minLat = markers.map((marker) => marker.point.latitude).reduce(min);
+    var maxLat = markers.map((marker) => marker.point.latitude).reduce(max);
+    var minLng = markers.map((marker) => marker.point.longitude).reduce(min);
+    var maxLng = markers.map((marker) => marker.point.longitude).reduce(max);
+    return LatLngBounds(LatLng(minLat, minLng), LatLng(maxLat, maxLng));
   }
 
   void _onMarkerTapped(bool isSpecialDrop) async {
@@ -186,7 +169,8 @@ class _MapScreenState extends State<MapScreen> {
           children: [
             if ((randomAlbum['albumArt'] ?? '').isNotEmpty)
               GestureDetector(
-                onTap: () => _selectRandomSong(randomAlbum['albumId'] ?? ''),
+                onTap: () =>
+                    _selectRandomSong(randomAlbum['albumId'] ?? '', context),
                 child: Image.network(
                   randomAlbum['albumArt']!,
                   width: 150,
@@ -195,7 +179,7 @@ class _MapScreenState extends State<MapScreen> {
               ),
           ],
         ),
-        actions: <Widget>[
+        actions: [
           TextButton(
             child: const Text('Close'),
             onPressed: () {
@@ -207,26 +191,29 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  void _selectRandomSong(String albumId) async {
-    if (!mounted) return;
-
+  void _selectRandomSong(String albumId, BuildContext context) async {
     // Close the album dialog before showing the song dialog
-    Navigator.of(_parentContext).pop();
+    Navigator.of(context).pop();
+
+    BuildContext? _loadingDialogContext;
 
     // Show loading indicator
     showDialog(
       context: _parentContext,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
+      builder: (context) {
+        _loadingDialogContext = context;
+        return const Center(child: CircularProgressIndicator());
+      },
       barrierDismissible: false,
     );
 
     // Fetch song data using the album ID and get the album art and album name
     final randomSong = await _spotifyService.fetchRandomSongFromAlbum(albumId);
 
-    if (!mounted) return;
+    if (!_loadingDialogContext!.mounted) return;
 
     // Close the loading indicator
-    Navigator.of(_parentContext).pop();
+    Navigator.of(_loadingDialogContext!).pop();
 
     // Add the song to the list of clicked songs
     setState(() {
@@ -345,17 +332,11 @@ class _MapScreenState extends State<MapScreen> {
             ],
           ),
         ),
-        actions: <Widget>[
+        actions: [
           TextButton(
-            child: const Text(
-              'Close',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-              ),
-            ),
+            child: const Text('Close'),
             onPressed: () {
-              Navigator.of(_parentContext).pop();
+              Navigator.of(context).pop();
             },
           ),
         ],
@@ -364,8 +345,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _navigateToArtistInfo(String artistId) {
-    Navigator.push(
-      _parentContext,
+    Navigator.of(_parentContext).push(
       MaterialPageRoute(
         builder: (context) => ArtistInfoScreen(artistId: artistId),
       ),
@@ -445,8 +425,6 @@ class _MapScreenState extends State<MapScreen> {
                   MarkerLayer(markers: _markers!),
                   CurrentLocationLayer(
                       style: LocationMarkerStyle(
-                          headingSectorColor: Colors.red,
-                          headingSectorRadius: 120,
                           marker: DefaultLocationMarker(
                               color: Colors.blue.shade900)))
                 ],
