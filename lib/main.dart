@@ -4,7 +4,7 @@ import 'package:music_game/app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MaterialApp(
-      home: const MyApp(),
+      home: const App(),
       themeMode: ThemeMode.system,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),

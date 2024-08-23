@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:music_game/routes/map.dart';
 import 'package:music_game/routes/profile.dart';
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class App extends StatefulWidget {
+  static final navigatorKey = GlobalKey<NavigatorState>();
+
+  const App({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<App> createState() => _AppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  List<String> userArtists = [];
-  final _navigatorKey = GlobalKey<NavigatorState>();
+class _AppState extends State<App> {
   int _currentTabIndex = 0;
 
   @override
@@ -20,8 +20,8 @@ class _MyAppState extends State<MyApp> {
       bottomNavigationBar: NavigationBar(
           destinations: const <Widget>[
             NavigationDestination(icon: Icon(Icons.map), label: 'Map'),
-            NavigationDestination(icon: Icon(Icons.handshake), label: 'Trade'),
-            NavigationDestination(icon: Icon(Icons.person), label: 'Profile')
+            NavigationDestination(icon: Icon(Icons.repeat_rounded), label: 'Trade'),
+            NavigationDestination(icon: Icon(Icons.album), label: 'Collection')
           ],
           selectedIndex: _currentTabIndex,
           onDestinationSelected: (int index) {
@@ -30,13 +30,13 @@ class _MyAppState extends State<MyApp> {
             });
             switch (index) {
               case 0:
-                _navigatorKey.currentState?.pushNamed('/');
+                App.navigatorKey.currentState?.pushNamed('/');
                 break;
               case 1:
-                _navigatorKey.currentState?.pushNamed('/trade');
+                App.navigatorKey.currentState?.pushNamed('/trade');
                 break;
               case 2:
-                _navigatorKey.currentState?.pushNamed('/profile');
+                App.navigatorKey.currentState?.pushNamed('/profile');
                 break;
             }
           }),
@@ -48,7 +48,6 @@ class _MyAppState extends State<MyApp> {
         //   }
         // },
         child: Navigator(
-          key: _navigatorKey,
           initialRoute: '/',
           onGenerateRoute: (RouteSettings settings) {
             WidgetBuilder builder;
