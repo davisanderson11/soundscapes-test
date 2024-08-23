@@ -20,7 +20,8 @@ class _AppState extends State<App> {
       bottomNavigationBar: NavigationBar(
           destinations: const <Widget>[
             NavigationDestination(icon: Icon(Icons.map), label: 'Map'),
-            NavigationDestination(icon: Icon(Icons.repeat_rounded), label: 'Trade'),
+            NavigationDestination(
+                icon: Icon(Icons.repeat_rounded), label: 'Trade'),
             NavigationDestination(icon: Icon(Icons.album), label: 'Collection')
           ],
           selectedIndex: _currentTabIndex,
