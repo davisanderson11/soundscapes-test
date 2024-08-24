@@ -169,16 +169,15 @@ class _MapScreenState extends State<MapScreen> {
     showDialog(
       context: _parentContext,
       builder: (context) => AlertDialog(
-        title: Text(randomAlbum['albumName'] ?? 'Unknown Album'),
+        title: Text(randomAlbum?.name ?? 'Unknown album'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if ((randomAlbum['albumArt'] ?? '').isNotEmpty)
+            if ((randomAlbum?.cover ?? '').isNotEmpty)
               GestureDetector(
-                onTap: () =>
-                    _selectRandomSong(randomAlbum['albumId'] ?? '', context),
+                onTap: () => _selectRandomSong(randomAlbum.id, context),
                 child: Image.network(
-                  randomAlbum['albumArt']!,
+                  randomAlbum!.cover,
                   width: 150,
                   height: 150,
                 ),
@@ -223,14 +222,11 @@ class _MapScreenState extends State<MapScreen> {
 
     // Add the song to the list of clicked songs
     setState(() {
+      if (randomSong == null) return;
       _songCollection.insert(0, randomSong);
       _saveSongCollection();
     });
 
-    // Use the album art from the returned data
-    String albumArt = randomSong.albumArt;
-
-    // Determine the color based on the quality
     Color getQualityColor(String quality) {
       switch (quality) {
         case 'Low':
@@ -264,9 +260,10 @@ class _MapScreenState extends State<MapScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (albumArt.isNotEmpty)
+              if (randomSong?.albumArt != null &&
+                  randomSong!.albumArt.isNotEmpty)
                 Image.network(
-                  albumArt,
+                  randomSong.albumArt,
                   width: 150,
                   height: 150,
                   errorBuilder: (context, error, stackTrace) {
@@ -279,7 +276,7 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               const SizedBox(height: 10),
               Text(
-                randomSong.track,
+                randomSong?.track ?? '',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 22,
@@ -293,9 +290,8 @@ class _MapScreenState extends State<MapScreen> {
               const SizedBox(height: 5),
               GestureDetector(
                 onTap: () {
-                  // FIXME
-                  if (randomSong.artistId != null) {
-                    _navigateToArtistInfo(randomSong.artistId);
+                  if (randomSong?.artistId != null) {
+                    _navigateToArtistInfo(randomSong!.artistId);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -304,8 +300,7 @@ class _MapScreenState extends State<MapScreen> {
                   }
                 },
                 child: Text(
-                  // FIXME
-                  'by ${randomSong.artist ?? 'Unknown Artist'}',
+                  'by ${randomSong?.artist ?? 'Unknown Artist'}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 18,
@@ -323,11 +318,11 @@ class _MapScreenState extends State<MapScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: getQualityColor(randomSong.quality),
+                  color: getQualityColor(randomSong?.quality ?? 'Low'),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  randomSong.quality,
+                  randomSong?.quality ?? 'Low',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

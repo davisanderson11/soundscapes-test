@@ -39,8 +39,7 @@ class SpotifyService {
     }
   }
 
-  Future<Map<String, String>> fetchRandomAlbumAndCacheNext(
-      List<String> userArtists) async {
+  Future<Album?> fetchRandomAlbumAndCacheNext(List<String> userArtists) async {
     final token = await _getAccessToken();
 
     // Fetch random artist and album
@@ -52,56 +51,43 @@ class SpotifyService {
     return currentAlbum;
   }
 
-  Future<Map<String, String>> _fetchRandomArtistAndAlbum(
+  Future<Album?> _fetchRandomArtistAndAlbum(
       String token, List<String> userArtists) async {
     bool chooseFavorite = Random().nextDouble() < .10; // 10%
-    String artistId, artistName;
+    String artistId;
 
     if (chooseFavorite && userArtists.isNotEmpty) {
       final favoriteArtist = userArtists[Random().nextInt(userArtists.length)];
-      final searchResponse = await http.get(
+      final response = await http.get(
         Uri.parse(
             'https://api.spotify.com/v1/search?q=$favoriteArtist&type=artist&limit=1'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
-      if (searchResponse.statusCode == 200) {
-        final searchData = jsonDecode(searchResponse.body);
-        final artists = searchData['artists']['items'] as List<dynamic>;
-        if (artists.isNotEmpty) {
-          final artist = artists[0];
-          artistId = artist['id'];
-          artistName = artist['name'];
-        } else {
-          return _emptyAlbum();
-        }
-      } else {
-        return _emptyAlbum();
-      }
+      if (response.statusCode != 200) return null;
+      final searchData = jsonDecode(response.body);
+      final artists = searchData['artists']['items'] as List<dynamic>;
+
+      if (artists.isEmpty) return null;
+      final artist = artists[0];
+      artistId = artist['id'];
     } else {
       String randomLetter = String.fromCharCode(Random().nextInt(26) + 97);
-      final searchResponse = await http.get(
+      final response = await http.get(
         Uri.parse(
             'https://api.spotify.com/v1/search?q=$randomLetter&type=artist&limit=50'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
-      if (searchResponse.statusCode == 200) {
-        final searchData = jsonDecode(searchResponse.body);
-        final artists = searchData['artists']['items'] as List<dynamic>;
-        if (artists.isNotEmpty) {
-          final randomArtist = artists[Random().nextInt(artists.length)];
-          artistId = randomArtist['id'];
-          artistName = randomArtist['name'];
-        } else {
-          return _emptyAlbum();
-        }
-      } else {
-        return _emptyAlbum();
-      }
+      if (response.statusCode != 200) return null;
+      final searchData = jsonDecode(response.body);
+      final artists = searchData['artists']['items'] as List<dynamic>;
+
+      if (artists.isEmpty) return null;
+      final randomArtist = artists[Random().nextInt(artists.length)];
+      artistId = randomArtist['id'];
     }
 
-    // Fetch a random album for the selected artist
     return await _getRandomAlbumForArtist(artistId, token);
   }
 
@@ -110,25 +96,18 @@ class SpotifyService {
     await _fetchRandomArtistAndAlbum(token, userArtists);
   }
 
-  Future<Map<String, String>> _getRandomAlbumForArtist(
-      String artistId, String token) async {
+  Future<Album?> _getRandomAlbumForArtist(String artistId, String token) async {
     final albums = await _getAlbumsForArtist(artistId, token, 50);
 
-    if (albums.isNotEmpty) {
-      final randomAlbum = albums[Random().nextInt(albums.length)];
-      String albumArtUrl = randomAlbum['images'] != null &&
-              randomAlbum['images'].isNotEmpty
-          ? randomAlbum['images'][0]['url'].replaceFirst('http://', 'https://')
-          : '';
+    if (albums.isEmpty) return null;
+    final randomAlbum = albums[Random().nextInt(albums.length)];
+    String albumArtUrl = randomAlbum['images'] != null &&
+            randomAlbum['images'].isNotEmpty
+        ? randomAlbum['images'][0]['url'].replaceFirst('http://', 'https://')
+        : '';
 
-      return {
-        'albumId': randomAlbum['id'],
-        'albumName': randomAlbum['name'],
-        'albumArt': albumArtUrl,
-      };
-    }
-
-    return _emptyAlbum();
+    return Album(
+        id: randomAlbum['id'], name: randomAlbum['name'], cover: albumArtUrl);
   }
 
   Future<List<Map<String, dynamic>>> _getAlbumsForArtist(
@@ -160,14 +139,6 @@ class SpotifyService {
     return albums;
   }
 
-  Map<String, String> _emptyAlbum() {
-    return {
-      'albumId': '',
-      'albumName': 'Unknown Album',
-      'albumArt': '',
-    };
-  }
-
   Future<Map<String, String>> fetchArtistInfo(String artistId) async {
     final token = await _getAccessToken();
     final response = await http.get(
@@ -190,50 +161,39 @@ class SpotifyService {
     }
   }
 
-  Future<Song> fetchRandomSongFromAlbum(String albumId) async {
+  Future<Song?> fetchRandomSongFromAlbum(String albumId) async {
     final token = await _getAccessToken();
-
-    final albumResponse = await http.get(
+    final response = await http.get(
       Uri.parse('https://api.spotify.com/v1/albums/$albumId'),
       headers: {'Authorization': 'Bearer $token'},
     );
 
-    if (albumResponse.statusCode == 200) {
-      final albumData = jsonDecode(albumResponse.body);
-      final albumName = albumData['name'];
-      final albumArtUrl = albumData['images'] != null &&
-              albumData['images'].isNotEmpty
-          ? albumData['images'][0]['url'].replaceFirst('http://', 'https://')
-          : '';
+    if (response.statusCode != 200) return null;
 
-      final tracks = albumData['tracks']['items'] as List<dynamic>;
-      final randomTrack = tracks[Random().nextInt(tracks.length)];
-      final trackName = randomTrack['name'] ?? 'Unknown Track';
+    final albumData = jsonDecode(response.body);
+    final albumName = albumData['name'];
+    final albumArtUrl =
+        albumData['images'] != null && albumData['images'].isNotEmpty
+            ? albumData['images'][0]['url'].replaceFirst('http://', 'https://')
+            : '';
 
-      final artistId = randomTrack['artists'][0]['id'];
-      final artistName = randomTrack['artists'][0]['name'] ?? 'Unknown Artist';
+    final tracks = albumData['tracks']['items'] as List<dynamic>;
+    final randomTrack = tracks[Random().nextInt(tracks.length)];
 
-      final randomQuality =
-          commonQualities[Random().nextInt(commonQualities.length)];
+    if (randomTrack == null) return null;
+    final trackName = randomTrack['name'];
+    final artistId = randomTrack['artists'][0]['id'];
+    final artistName = randomTrack['artists'][0]['name'];
+    final quality = commonQualities[Random().nextInt(commonQualities.length)];
 
-      return Song(
-        artistId: artistId,
-        artist: artistName,
-        track: trackName,
-        albumArt: albumArtUrl,
-        quality: randomQuality,
-        albumName: albumName,
-      );
-    } else {
-      return const Song(
-        artistId: '',
-        artist: 'Unknown Artist',
-        track: 'No song found',
-        albumArt: '',
-        quality: 'Unknown',
-        albumName: 'Unknown Album',
-      );
-    }
+    return Song(
+      artistId: artistId,
+      artist: artistName,
+      track: trackName,
+      albumArt: albumArtUrl,
+      quality: quality,
+      albumName: albumName,
+    );
   }
 }
 
@@ -270,6 +230,32 @@ class Song {
     data['albumArt'] = albumArt;
     data['quality'] = quality;
     data['albumName'] = albumName;
+    return data;
+  }
+}
+
+@immutable
+class Album {
+  final String id;
+  final String name;
+  final String cover;
+
+  const Album({
+    required this.id,
+    required this.name,
+    required this.cover,
+  });
+
+  Album.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        name = json['name'],
+        cover = json['cover'];
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    data['id'] = id;
+    data['name'] = name;
+    data['cover'] = cover;
     return data;
   }
 }
