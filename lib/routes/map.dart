@@ -18,10 +18,11 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final SpotifyService _spotifyService = SpotifyService();
-  List<Song> _songCollection = [];
   List<Marker>? _markers;
   final MapController _mapController = MapController();
-  List<String> userArtists = [];
+
+  List<Song> _songCollection = [];
+  List<String> _userArtists = [];
 
   late BuildContext _parentContext;
 
@@ -35,7 +36,7 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _loadUserArtists() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() => userArtists = prefs.getStringList('user_artists') ?? []);
+    setState(() => _userArtists = prefs.getStringList('user_artists') ?? []);
   }
 
   Future<void> _loadSongCollection() async {
@@ -49,6 +50,11 @@ class _MapScreenState extends State<MapScreen> {
             .toList();
       });
     }
+  }
+
+  Future<void> _saveUserArtists() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList('user_artists', _userArtists);
   }
 
   Future<void> _saveSongCollection() async {
@@ -157,7 +163,7 @@ class _MapScreenState extends State<MapScreen> {
 
   void _onMarkerTapped(bool isSpecialDrop) async {
     final randomAlbum =
-        await _spotifyService.fetchRandomAlbumAndCacheNext(userArtists);
+        await _spotifyService.fetchRandomAlbumAndCacheNext(_userArtists);
 
     if (!mounted) return;
     showDialog(
@@ -352,16 +358,15 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  void _resetMapZoom() {
-    LatLngBounds bounds = _getBoundsForMarkers(_markers!);
-    _mapController.fitCamera(
-        CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(20)));
-  }
+  // void _resetMapZoom() {
+  //   LatLngBounds bounds = _getBoundsForMarkers(_markers!);
+  //   _mapController.fitCamera(
+  //       CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(20)));
+  // }
 
   void _showFavoritesDialog() async {
     final controllers =
-        List.generate(5, (i) => TextEditingController(text: userArtists[i]));
-    final prefs = await SharedPreferences.getInstance();
+        List.generate(5, (i) => TextEditingController(text: _userArtists[i]));
 
     if (!mounted) return;
     await showDialog(
@@ -384,9 +389,10 @@ class _MapScreenState extends State<MapScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                final artists = controllers.map((ctrl) => ctrl.text).toList();
-                prefs.setStringList('user_artists', artists);
-                setState(() => userArtists = artists);
+                setState(() {
+                  _userArtists = controllers.map((ctrl) => ctrl.text).toList();
+                });
+                _saveUserArtists();
                 Navigator.of(context).pop();
               },
               child: const Text('Submit'),
