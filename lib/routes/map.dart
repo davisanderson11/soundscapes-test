@@ -6,6 +6,7 @@ import 'package:music_game/services/spotify.dart';
 import 'package:music_game/artist_info_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+import 'package:spotify/spotify.dart' as spotify;
 import 'dart:math';
 import 'dart:convert';
 
@@ -21,7 +22,7 @@ class _MapScreenState extends State<MapScreen> {
   List<Marker>? _markers;
   final MapController _mapController = MapController();
 
-  List<Song> _songCollection = [];
+  List<spotify.TrackSimple> _songCollection = [];
   List<String> _userArtists = [];
 
   late BuildContext _parentContext;
@@ -46,7 +47,7 @@ class _MapScreenState extends State<MapScreen> {
     if (songCollectionStrings != null) {
       setState(() {
         _songCollection = songCollectionStrings
-            .map((str) => Song.fromJson(json.decode(str)))
+            .map((str) => spotify.TrackSimple.fromJson(json.decode(str)))
             .toList();
       });
     }
@@ -163,7 +164,7 @@ class _MapScreenState extends State<MapScreen> {
 
   void _onMarkerTapped(bool isSpecialDrop) async {
     final randomAlbum =
-        await _spotifyService.fetchRandomAlbumAndCacheNext(_userArtists);
+        await _spotifyService.fetchRandomArtistAndAlbum(_userArtists);
 
     if (!mounted) return;
     showDialog(
@@ -173,11 +174,11 @@ class _MapScreenState extends State<MapScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if ((randomAlbum?.cover ?? '').isNotEmpty)
+            if (randomAlbum?.images?.first.url != null)
               GestureDetector(
-                onTap: () => _selectRandomSong(randomAlbum.id, context),
+                onTap: () => _selectRandomSong(randomAlbum.id!, context),
                 child: Image.network(
-                  randomAlbum!.cover,
+                  randomAlbum!.images!.first.url!,
                   width: 150,
                   height: 150,
                 ),
@@ -222,7 +223,6 @@ class _MapScreenState extends State<MapScreen> {
 
     // Add the song to the list of clicked songs
     setState(() {
-      if (randomSong == null) return;
       _songCollection.insert(0, randomSong);
       _saveSongCollection();
     });
@@ -260,23 +260,23 @@ class _MapScreenState extends State<MapScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (randomSong?.albumArt != null &&
-                  randomSong!.albumArt.isNotEmpty)
-                Image.network(
-                  randomSong.albumArt,
-                  width: 150,
-                  height: 150,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(
-                      Icons.broken_image,
-                      size: 150,
-                      color: Colors.grey,
-                    );
-                  },
-                ),
+              // if (randomSong.first?.url != null &&
+              //     randomSong!.albumArt.isNotEmpty)
+              //   Image.network(
+              //     randomSong.albumArt,
+              //     width: 150,
+              //     height: 150,
+              //     errorBuilder: (context, error, stackTrace) {
+              //       return const Icon(
+              //         Icons.broken_image,
+              //         size: 150,
+              //         color: Colors.grey,
+              //       );
+              //     },
+              //   ),
               const SizedBox(height: 10),
               Text(
-                randomSong?.track ?? '',
+                randomSong.name ?? '',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 22,
@@ -290,8 +290,8 @@ class _MapScreenState extends State<MapScreen> {
               const SizedBox(height: 5),
               GestureDetector(
                 onTap: () {
-                  if (randomSong?.artistId != null) {
-                    _navigateToArtistInfo(randomSong!.artistId);
+                  if (randomSong.artists?.first.id != null) {
+                    _navigateToArtistInfo(randomSong.artists!.first.id!);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -300,7 +300,7 @@ class _MapScreenState extends State<MapScreen> {
                   }
                 },
                 child: Text(
-                  'by ${randomSong?.artist ?? 'Unknown Artist'}',
+                  'by ${randomSong.artists?.first.name ?? 'Unknown Artist'}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 18,
@@ -314,22 +314,22 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: getQualityColor(randomSong?.quality ?? 'Low'),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  randomSong?.quality ?? 'Low',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
+              // Container(
+              //   padding:
+              //       const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              //   decoration: BoxDecoration(
+              //     color: getQualityColor(randomSong?.quality ?? 'Low'),
+              //     borderRadius: BorderRadius.circular(20),
+              //   ),
+              //   child: Text(
+              //     randomSong?.quality ?? 'Low',
+              //     style: const TextStyle(
+              //       color: Colors.white,
+              //       fontWeight: FontWeight.bold,
+              //       fontSize: 16,
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),
