@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:music_game/spotify_service.dart';
+import 'package:music_game/services/spotify.dart';
 import 'package:music_game/artist_info_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';

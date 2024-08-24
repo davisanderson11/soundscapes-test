@@ -225,7 +225,7 @@ class SpotifyService {
         albumName: albumName,
       );
     } else {
-      return Song(
+      return const Song(
         artistId: '',
         artist: 'Unknown Artist',
         track: 'No song found',
@@ -239,14 +239,14 @@ class SpotifyService {
 
 @immutable
 class Song {
-  String artistId;
-  String artist;
-  String track;
-  String albumArt;
-  String quality;
-  String albumName;
+  final String artistId;
+  final String artist;
+  final String track;
+  final String albumArt;
+  final String quality;
+  final String albumName;
 
-  Song(
+  const Song(
       {required this.artistId,
       required this.artist,
       required this.track,
