@@ -10,40 +10,29 @@ class SpotifyService extends SpotifyApi {
   final List<String> commonQualities = ['Low', 'Medium', 'High'];
   final List<String> specialQualities = ['Low', 'Medium', 'High', 'CDQ', 'HR'];
 
-  Future<Album?> fetchRandomArtistAndAlbum(List<String> userArtists) async {
+  Future<Album?> fetchRandomAlbum(List<String> userArtists) async {
     bool chooseFavorite = Random().nextDouble() < .10; // 10%
-    String artistId;
+    Artist artist;
 
     if (chooseFavorite && userArtists.isNotEmpty) {
       final favoriteArtist = userArtists[Random().nextInt(userArtists.length)];
-
-      Artist artist = await search
+      artist = await search
           .get(favoriteArtist, types: [SearchType.artist])
           .first(1)
-          .then((r) => r.first.items!.first);
-
-      artistId = artist.id!;
+          .then((pages) => pages.first.items!.first);
     } else {
       String randomLetter = String.fromCharCode(Random().nextInt(26) + 97);
+
       final artists = await search
           .get(randomLetter, types: [SearchType.artist])
           .first(50)
           .then((pages) => pages.first.items!);
-      Artist randomArtist = artists.elementAt(Random().nextInt(artists.length));
-      artistId = randomArtist.id!;
+      artist = artists.elementAt(Random().nextInt(artists.length));
     }
 
-    return await _getRandomAlbumForArtist(artistId);
-  }
-
-  Future<Album?> _getRandomAlbumForArtist(String artistId) async {
-    final albums =
-        await artists.albums(artistId).all(50).then((iter) => iter.toList());
-    return albums[Random().nextInt(albums.length)];
-  }
-
-  Future<TrackSimple> fetchRandomSongFromAlbum(String albumId) async {
-    final tracks = await albums.tracks(albumId).all(50);
-    return tracks.elementAt(Random().nextInt(tracks.length));
+    final albums = await artists.albums(artist.id!).all(50);
+    final releases =
+        albums.where((album) => album.albumType != AlbumType.compilation);
+    return releases.elementAt(Random().nextInt(releases.length));
   }
 }

@@ -4,9 +4,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:music_game/services/spotify.dart';
 import 'package:music_game/artist_info_screen.dart';
+import 'package:music_game/routes/drop_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:spotify/spotify.dart' as spotify;
+import 'dart:ui';
 import 'dart:math';
 import 'dart:convert';
 
@@ -18,7 +20,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  final SpotifyService _spotifyService = SpotifyService();
+  final SpotifyService _spotify = SpotifyService();
   List<Marker>? _markers;
   final MapController _mapController = MapController();
 
@@ -43,7 +45,6 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _loadSongCollection() async {
     final prefs = await SharedPreferences.getInstance();
     final songCollectionStrings = prefs.getStringList('song_collection');
-    // print(clickedSongsString);
     if (songCollectionStrings != null) {
       setState(() {
         _songCollection = songCollectionStrings
@@ -74,15 +75,13 @@ class _MapScreenState extends State<MapScreen> {
 
       markers.add(
         Marker(
-          width: 40,
-          height: 40,
           point: point,
           child: GestureDetector(
             onTap: () => _onMarkerTapped(special),
             child: Opacity(
                 opacity: 0.7,
                 child: Icon(special ? Icons.star : Icons.music_note,
-                    color: special ? Colors.purple : Colors.blue, size: 40)),
+                    color: special ? Colors.purple : Colors.blue, size: 30)),
           ),
         ),
       );
@@ -163,181 +162,30 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _onMarkerTapped(bool isSpecialDrop) async {
-    final randomAlbum =
-        await _spotifyService.fetchRandomArtistAndAlbum(_userArtists);
+    final album = await _spotify.fetchRandomAlbum(_userArtists);
+    final tracks = await _spotify.albums.tracks(album!.id!).all(50);
+    final cover = album.images?.first.url ?? '';
+    final track = tracks.elementAt(Random().nextInt(tracks.length));
+    final quality = SongQuality
+        .values[Random().nextInt(SongQuality.values.length)]; // FIXME: weights
 
     if (!mounted) return;
     showDialog(
       context: _parentContext,
       builder: (context) => AlertDialog(
-        title: Text(randomAlbum?.name ?? 'Unknown album'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (randomAlbum?.images?.first.url != null)
-              GestureDetector(
-                onTap: () => _selectRandomSong(randomAlbum.id!, context),
-                child: Image.network(
-                  randomAlbum!.images!.first.url!,
-                  width: 150,
-                  height: 150,
-                ),
-              ),
-          ],
-        ),
+        contentPadding: const EdgeInsets.fromLTRB(0, 60, 0, 60),
+        content: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Image.network(cover, width: 100, height: 100)), //),
+        actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(
-            child: const Text('Close'),
+            child: const Text('Open'),
             onPressed: () {
               Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _selectRandomSong(String albumId, BuildContext context) async {
-    // Close the album dialog before showing the song dialog
-    Navigator.of(context).pop();
-
-    BuildContext? _loadingDialogContext;
-
-    // Show loading indicator
-    showDialog(
-      context: _parentContext,
-      builder: (context) {
-        _loadingDialogContext = context;
-        return const Center(child: CircularProgressIndicator());
-      },
-      barrierDismissible: false,
-    );
-
-    // Fetch song data using the album ID and get the album art and album name
-    final randomSong = await _spotifyService.fetchRandomSongFromAlbum(albumId);
-
-    if (!_loadingDialogContext!.mounted) return;
-
-    // Close the loading indicator
-    Navigator.of(_loadingDialogContext!).pop();
-
-    // Add the song to the list of clicked songs
-    setState(() {
-      _songCollection.insert(0, randomSong);
-      _saveSongCollection();
-    });
-
-    Color getQualityColor(String quality) {
-      switch (quality) {
-        case 'Low':
-          return Colors.red;
-        case 'Medium':
-          return Colors.orange;
-        case 'High':
-          return Colors.yellow;
-        case 'CD':
-          return Colors.green;
-        case 'HR':
-          return Colors.blue;
-        case 'Lossless':
-          return Colors.purple;
-        case 'Master':
-          return Colors.black;
-        default:
-          return Colors.grey;
-      }
-    }
-
-    // Show the song details using the album art and quality color
-    showDialog(
-      context: _parentContext,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.black,
-        contentPadding: const EdgeInsets.all(16),
-        content: SizedBox(
-          width: 300,
-          height: 300,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // if (randomSong.first?.url != null &&
-              //     randomSong!.albumArt.isNotEmpty)
-              //   Image.network(
-              //     randomSong.albumArt,
-              //     width: 150,
-              //     height: 150,
-              //     errorBuilder: (context, error, stackTrace) {
-              //       return const Icon(
-              //         Icons.broken_image,
-              //         size: 150,
-              //         color: Colors.grey,
-              //       );
-              //     },
-              //   ),
-              const SizedBox(height: 10),
-              Text(
-                randomSong.name ?? '',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 22,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Roboto',
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-              const SizedBox(height: 5),
-              GestureDetector(
-                onTap: () {
-                  if (randomSong.artists?.first.id != null) {
-                    _navigateToArtistInfo(randomSong.artists!.first.id!);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Artist information not available')),
-                    );
-                  }
-                },
-                child: Text(
-                  'by ${randomSong.artists?.first.name ?? 'Unknown Artist'}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.blue,
-                    fontStyle: FontStyle.italic,
-                    fontFamily: 'Roboto',
-                    decoration: TextDecoration.underline,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ),
-              const SizedBox(height: 10),
-              // Container(
-              //   padding:
-              //       const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              //   decoration: BoxDecoration(
-              //     color: getQualityColor(randomSong?.quality ?? 'Low'),
-              //     borderRadius: BorderRadius.circular(20),
-              //   ),
-              //   child: Text(
-              //     randomSong?.quality ?? 'Low',
-              //     style: const TextStyle(
-              //       color: Colors.white,
-              //       fontWeight: FontWeight.bold,
-              //       fontSize: 16,
-              //     ),
-              //   ),
-              // ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: const Text('Close'),
-            onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => DropInfoScreen(
+                      song: track, album: album, quality: quality)));
             },
           ),
         ],
@@ -352,12 +200,6 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
-
-  // void _resetMapZoom() {
-  //   LatLngBounds bounds = _getBoundsForMarkers(_markers!);
-  //   _mapController.fitCamera(
-  //       CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(20)));
-  // }
 
   void _showFavoritesDialog() async {
     final controllers =
