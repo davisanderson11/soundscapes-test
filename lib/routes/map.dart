@@ -3,7 +3,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:music_game/services/spotify.dart';
-import 'package:music_game/artist_info_screen.dart';
 import 'package:music_game/routes/drop_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -19,7 +18,8 @@ class MapScreen extends StatefulWidget {
   State<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> with AutomaticKeepAliveClientMixin {
+class _MapScreenState extends State<MapScreen>
+    with AutomaticKeepAliveClientMixin {
   final SpotifyService _spotify = SpotifyService();
   List<Marker>? _markers;
   final MapController _mapController = MapController();
@@ -172,6 +172,9 @@ class _MapScreenState extends State<MapScreen> with AutomaticKeepAliveClientMixi
     final quality = SongQuality
         .values[Random().nextInt(SongQuality.values.length)]; // FIXME: weights
 
+    _songCollection.add(track);
+    _saveSongCollection();
+
     if (!mounted) return;
     showDialog(
       context: _parentContext,
@@ -192,14 +195,6 @@ class _MapScreenState extends State<MapScreen> with AutomaticKeepAliveClientMixi
             },
           ),
         ],
-      ),
-    );
-  }
-
-  void _navigateToArtistInfo(String artistId) {
-    Navigator.of(_parentContext).push(
-      MaterialPageRoute(
-        builder: (context) => ArtistInfoScreen(artistId: artistId),
       ),
     );
   }
