@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class ProfileScreen extends StatelessWidget {
+class CollectionScreen extends StatelessWidget {
   final List<Map<String, String>> clickedSongs = const [];
 
-  const ProfileScreen({super.key});
+  const CollectionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -19,7 +19,7 @@ class MapScreen extends StatefulWidget {
   State<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _MapScreenState extends State<MapScreen> with AutomaticKeepAliveClientMixin {
   final SpotifyService _spotify = SpotifyService();
   List<Marker>? _markers;
   final MapController _mapController = MapController();
@@ -36,6 +36,9 @@ class _MapScreenState extends State<MapScreen> {
     _loadSongCollection();
     _loadUserArtists();
   }
+
+  @override
+  get wantKeepAlive => true;
 
   Future<void> _loadUserArtists() async {
     final prefs = await SharedPreferences.getInstance();
@@ -242,6 +245,8 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     // Save the parent context
     _parentContext = context;
     final theme = Theme.of(context).brightness.name;
