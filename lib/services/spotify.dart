@@ -7,8 +7,6 @@ class SpotifyService extends SpotifyApi {
 
   SpotifyService() : super(SpotifyService.credentials);
 
-  final List<String> commonQualities = ['Low', 'Medium', 'High'];
-  final List<String> specialQualities = ['Low', 'Medium', 'High', 'CDQ', 'HR'];
 
   Future<Album?> fetchRandomAlbum(List<String> userArtists) async {
     bool chooseFavorite = Random().nextDouble() < .10; // 10%
@@ -30,9 +28,10 @@ class SpotifyService extends SpotifyApi {
       artist = artists.elementAt(Random().nextInt(artists.length));
     }
 
+    bool chooseSingle = Random().nextDouble() < .10; // 10%
     final albums = await artists.albums(artist.id!).all(50);
     final releases =
-        albums.where((album) => album.albumType != AlbumType.compilation);
+        albums.where((album) => album.albumType == (chooseSingle ? AlbumType.single : AlbumType.album));
     return releases.elementAt(Random().nextInt(releases.length));
   }
 }
