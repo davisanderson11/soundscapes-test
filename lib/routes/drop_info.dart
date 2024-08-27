@@ -118,11 +118,11 @@ enum SongQuality {
 
   Color getColor() {
     return {
-      'low': Colors.red,
-      'medium': Colors.orange,
-      'high': Colors.yellow,
-      'cd': Colors.green,
-      'hr': Colors.blue,
+      'low': const Color(0xFF6e6e6e),
+      'medium': const Color(0xFFc28325),
+      'high': const Color(0xFFe0e0e0),
+      'cd': const Color(0xFFffcf40),
+      'hr': const Color(0xFFdebee6),
       'lossless': Colors.purple,
       'master': Colors.black
     }[name]!;
