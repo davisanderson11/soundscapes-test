@@ -281,6 +281,14 @@ class _MapScreenState extends State<MapScreen>
                   child: const Icon(Icons.star /*, color: Colors.blue*/),
                 ),
               ),
+              Positioned(
+                  top: 20,
+                  right: 20,
+                  child: FloatingActionButton(
+                      mini: true,
+                      onPressed:
+                          _showFavoritesDialog, // FIXME: need profile page to switch to
+                      child: const Icon(Icons.person)))
             ],
           );
   }
