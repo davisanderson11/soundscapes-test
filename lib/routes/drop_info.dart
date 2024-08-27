@@ -107,6 +107,16 @@ class _DropInfoScreenState extends State<DropInfoScreen> {
   }
 }
 
+final weights = {
+  SongQuality.low: 95,
+  SongQuality.medium: 5,
+  SongQuality.high: 0,
+  SongQuality.cd: 0,
+  SongQuality.hr: 0,
+  SongQuality.lossless: 0,
+  SongQuality.master: 0
+};
+
 enum SongQuality {
   low,
   medium,
