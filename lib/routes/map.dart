@@ -10,7 +10,6 @@ import 'package:spotify/spotify.dart' as spotify;
 import 'dart:ui';
 import 'dart:math';
 import 'dart:convert';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -168,6 +167,10 @@ class _MapScreenState extends State<MapScreen>
   void _onMarkerTapped(bool isSpecialDrop) async {
     final album = await _spotify.fetchRandomAlbum(_userArtists);
     final tracks = await _spotify.albums.tracks(album!.id!).all(50);
+    if (tracks.isEmpty) {
+      throw 'No tracks (${album.name!} by ${album.artists!.first.name})';
+    }
+
     final cover = album.images?.first.url ?? '';
     final track = tracks.elementAt(Random().nextInt(tracks.length));
     final quality = SongQuality
@@ -182,7 +185,8 @@ class _MapScreenState extends State<MapScreen>
       builder: (context) => AlertDialog(
         contentPadding: const EdgeInsets.fromLTRB(0, 60, 0, 60),
         content: ImageFiltered(
-            imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            imageFilter: ImageFilter.blur(
+                sigmaX: 10, sigmaY: 10, tileMode: TileMode.mirror),
             child: Image.network(cover, width: 100, height: 100)), //),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
@@ -278,6 +282,7 @@ class _MapScreenState extends State<MapScreen>
                 left: 20,
                 child: FloatingActionButton(
                   mini: true,
+                  heroTag: 'favorites',
                   onPressed: _showFavoritesDialog,
                   child: const Icon(Icons.star /*, color: Colors.blue*/),
                 ),
@@ -287,6 +292,7 @@ class _MapScreenState extends State<MapScreen>
                   right: 20,
                   child: FloatingActionButton(
                       mini: true,
+                      heroTag: 'profile',
                       onPressed:
                           _showFavoritesDialog, // FIXME: need profile page to switch to
                       child: const Icon(Icons.person)))
