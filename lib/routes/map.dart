@@ -10,6 +10,7 @@ import 'package:spotify/spotify.dart' as spotify;
 import 'dart:ui';
 import 'dart:math';
 import 'dart:convert';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spotify/spotify.dart' as spotify;
 import 'package:music_game/services/spotify.dart';
 import 'dart:convert';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class CollectionScreen extends StatefulWidget {
   const CollectionScreen({super.key});
