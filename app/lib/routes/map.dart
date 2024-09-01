@@ -7,6 +7,7 @@ import 'package:music_game/routes/drop_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:spotify/spotify.dart' as spotify;
+import 'package:music_game/main.dart' show client;
 import 'dart:ui';
 import 'dart:math';
 import 'dart:convert';
@@ -246,7 +247,6 @@ class _MapScreenState extends State<MapScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
     // Save the parent context
     _parentContext = context;
     final theme = Theme.of(context).brightness.name;
