@@ -1,7 +1,5 @@
 import 'package:serverpod/serverpod.dart';
-
-import 'package:music_game_server/src/web/routes/root.dart';
-
+import 'package:server/src/web/routes/root.dart';
 import 'src/generated/protocol.dart';
 import 'src/generated/endpoints.dart';
 

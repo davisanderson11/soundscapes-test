@@ -238,10 +238,10 @@ ALTER TABLE ONLY "serverpod_query_log"
 
 
 --
--- MIGRATION VERSION FOR music_game
+-- MIGRATION VERSION FOR soundscapes
 --
 INSERT INTO "serverpod_migrations" ("module", "version", "timestamp")
-    VALUES ('music_game', '20240828034401589', now())
+    VALUES ('soundscapes', '20240828034401589', now())
     ON CONFLICT ("module")
     DO UPDATE SET "version" = '20240828034401589', "timestamp" = now();
 

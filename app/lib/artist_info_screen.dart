@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:music_game/services/spotify.dart';
+import 'package:app/services/spotify.dart';
 import 'package:spotify/spotify.dart' as spotify;
 
 class ArtistInfoScreen extends StatefulWidget {

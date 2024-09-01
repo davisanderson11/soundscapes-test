@@ -5,18 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "music_game",
+            "name": "soundscapes",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "music_game (profile mode)",
+            "name": "soundscapes (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "music_game (release mode)",
+            "name": "soundscapes (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

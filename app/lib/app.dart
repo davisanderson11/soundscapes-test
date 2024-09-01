@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:music_game/routes/map.dart';
-import 'package:music_game/routes/collection.dart';
+import 'package:app/routes/map.dart';
+import 'package:app/routes/collection.dart';
 
 class App extends StatefulWidget {
   const App({super.key});

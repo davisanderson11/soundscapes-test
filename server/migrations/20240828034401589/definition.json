@@ -1,5 +1,5 @@
 {
-  "moduleName": "music_game",
+  "moduleName": "soundscapes",
   "tables": [
     {
       "name": "serverpod_cloud_storage",
@@ -519,14 +519,10 @@
       "foreignKeys": [
         {
           "constraintName": "serverpod_log_fk_0",
-          "columns": [
-            "sessionLogId"
-          ],
+          "columns": ["sessionLogId"],
           "referenceTable": "serverpod_session_log",
           "referenceTableSchema": "public",
-          "referenceColumns": [
-            "id"
-          ],
+          "referenceColumns": ["id"],
           "onUpdate": 3,
           "onDelete": 4
         }
@@ -636,14 +632,10 @@
       "foreignKeys": [
         {
           "constraintName": "serverpod_message_log_fk_0",
-          "columns": [
-            "sessionLogId"
-          ],
+          "columns": ["sessionLogId"],
           "referenceTable": "serverpod_session_log",
           "referenceTableSchema": "public",
-          "referenceColumns": [
-            "id"
-          ],
+          "referenceColumns": ["id"],
           "onUpdate": 3,
           "onDelete": 4
         }
@@ -861,14 +853,10 @@
       "foreignKeys": [
         {
           "constraintName": "serverpod_query_log_fk_0",
-          "columns": [
-            "sessionLogId"
-          ],
+          "columns": ["sessionLogId"],
           "referenceTable": "serverpod_session_log",
           "referenceTableSchema": "public",
-          "referenceColumns": [
-            "id"
-          ],
+          "referenceColumns": ["id"],
           "onUpdate": 3,
           "onDelete": 4
         }
@@ -1141,7 +1129,7 @@
   ],
   "installedModules": [
     {
-      "module": "music_game",
+      "module": "soundscapes",
       "version": "20240828034401589"
     },
     {
