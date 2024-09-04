@@ -70,29 +70,22 @@ class _MapScreenState extends State<MapScreen>
   }
 
   Future<void> _initializeMarkers() async {
-    LatLng userLocation = await _getCurrentLocation(context);
-    List<Marker> markers = [];
-
-    for (int i = 0; i < 20; i++) {
-      final point = _getRandomLatLng(userLocation, 0.01);
-      final special = Random().nextDouble() < .10; // 10%
-
-      markers.add(
-        Marker(
-          point: point,
+    LatLng location = await _getCurrentLocation(context);
+    var drops = await client.drops.scan(location);
+    setState(() {
+      _markers = drops.map((drop) {
+        return Marker(
+          point: LatLng(drop.lat, drop.lng),
           child: GestureDetector(
-            onTap: () => _onMarkerTapped(special),
+            onTap: () => _onMarkerTapped(drop.special),
             child: Opacity(
                 opacity: 0.7,
-                child: Icon(special ? Icons.star : Icons.music_note,
-                    color: special ? Colors.purple : Colors.blue, size: 30)),
+                child: Icon(drop.special ? Icons.star : Icons.music_note,
+                    color: drop.special ? Colors.purple : Colors.blue,
+                    size: 30)),
           ),
-        ),
-      );
-    }
-
-    setState(() {
-      _markers = markers;
+        );
+      }).toList();
     });
   }
 
@@ -147,14 +140,6 @@ class _MapScreenState extends State<MapScreen>
         );
       },
     );
-  }
-
-  LatLng _getRandomLatLng(LatLng center, double offset) {
-    final random = Random();
-    final lat = center.latitude + (random.nextDouble() * (offset * 2) - offset);
-    final lng =
-        center.longitude + (random.nextDouble() * (offset * 2) - offset);
-    return LatLng(lat, lng);
   }
 
   LatLngBounds _getBoundsForMarkers(List<Marker> markers) {
@@ -258,6 +243,7 @@ class _MapScreenState extends State<MapScreen>
               FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
+                  minZoom: 3,
                   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   initialCameraFit: CameraFit.bounds(
                       bounds: _getBoundsForMarkers(_markers!),
