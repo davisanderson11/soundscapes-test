@@ -1,0 +1,3 @@
+name: soundscapes
+environment:
+    sdk: ^3.5.0
