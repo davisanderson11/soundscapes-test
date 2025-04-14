@@ -1,25 +1,20 @@
+# Dependencies
+node_modules
+
+# Env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Turbo
+.turbo
+
+# Build Outputs
+out/
+build/
+dist/
+
 # Misc
 .DS_Store
-
-# Flutter/Dart/Pub-related
-**/doc/api/
-**/.dart_tool/
-**/.flutter-plugins
-**/.flutter-plugins-dependencies
-**/.pub-cache/
-**/.pub/
-**/build/
-
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Generated code
-/client/lib/
-/client/pubspec.lock
-/server/lib/src/generated/
-
-# Serverpod secrets file
-/server/config/passwords.yaml

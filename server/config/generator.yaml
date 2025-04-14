@@ -1,5 +1,0 @@
-type: server
-
-client_package_path: ../client
-extraClasses:
-    - package:latlong2/latlong.dart:LatLng

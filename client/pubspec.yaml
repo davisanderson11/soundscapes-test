@@ -1,9 +1,0 @@
-name: client
-description: Soundscapes API client.
-
-environment:
-    sdk: ^3.2.0
-
-dependencies:
-    serverpod_client: 2.0.2
-    latlong2: ^0.9.1

@@ -1,0 +1,10 @@
+{
+    "extends": "expo/tsconfig.base",
+    "include": ["**/*.ts", "**/*.tsx", "expo-env.d.ts", ".expo/types/**/*.ts"],
+    "exclude": ["android", "ios"],
+    "references": [{ "path": "../server" }],
+    "compilerOptions": {
+        "paths": { "~/*": ["./*"] },
+        "strict": true
+    }
+}

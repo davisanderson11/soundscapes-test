@@ -1,0 +1,11 @@
+{
+    "extends": "fastify-tsconfig/tsconfig.json",
+    "compilerOptions": {
+        "paths": { "~/*": ["./src/*"] },
+        "outDir": "dist/",
+        "composite": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "esModuleInterop": true
+    }
+}

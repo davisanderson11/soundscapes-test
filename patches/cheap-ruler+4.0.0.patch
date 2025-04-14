@@ -1,0 +1,23 @@
+diff --git a/node_modules/cheap-ruler/index.d.ts b/node_modules/cheap-ruler/cheap-ruler.d.ts
+similarity index 100%
+rename from node_modules/cheap-ruler/index.d.ts
+rename to node_modules/cheap-ruler/cheap-ruler.d.ts
+diff --git a/node_modules/cheap-ruler/package.json b/node_modules/cheap-ruler/package.json
+index 7a35141..bc87a28 100644
+--- a/node_modules/cheap-ruler/package.json
++++ b/node_modules/cheap-ruler/package.json
+@@ -4,11 +4,11 @@
+   "description": "A collection of fast approximations to common geographic measurements.",
+   "author": "Vladimir Agafonkin",
+   "license": "ISC",
+-  "type": "module",
++  "type": "commonjs",
+   "main": "cheap-ruler.js",
+-  "exports": "./index.js",
++  "exports": "./cheap-ruler.js",
+   "module": "index.js",
+-  "types": "index.d.ts",
++  "types": "cheap-ruler.d.ts",
+   "devDependencies": {
+     "@turf/turf": "^7.0.0",
+     "benchmark": "^2.1.4",

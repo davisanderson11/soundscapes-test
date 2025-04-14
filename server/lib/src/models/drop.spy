@@ -1,7 +1,0 @@
-class: Drop
-table: drop
-fields:
-    lat: double
-    lng: double
-    special: bool
-    quad: Quad?, relation

@@ -1,5 +1,0 @@
-class: Quad
-table: quad
-fields:
-    lat: int
-    lng: int

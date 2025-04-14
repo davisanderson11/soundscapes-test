@@ -1,0 +1,11 @@
+{
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.indentSize": 4,
+    "editor.tabSize": 4,
+    "eslint.useFlatConfig": true,
+    "eslint.options": { "flags": ["unstable_ts_config"] },
+    "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }]
+}
