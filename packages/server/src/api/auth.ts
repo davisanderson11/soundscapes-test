@@ -41,6 +41,12 @@ const getSpotifyTokens = (code: string) =>
         )
     )
 
+console.log("id-len", process.env.SPOTIFY_CLIENT_ID!.length);
+console.log("secret-len", process.env.SPOTIFY_CLIENT_SECRET!.length);
+console.log("id raw", JSON.stringify(process.env.SPOTIFY_CLIENT_ID));
+console.log("secret raw", JSON.stringify(process.env.SPOTIFY_CLIENT_SECRET));
+
+
 const spotifyOAuth = new OAuth2(
     process.env.SPOTIFY_CLIENT_ID!,
     process.env.SPOTIFY_CLIENT_SECRET!,

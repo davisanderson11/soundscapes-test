@@ -9,7 +9,11 @@ import { Redirect } from "expo-router"
 
 export default function SignIn() {
     const [authRequest, authResponse, promptAuth] = useAuthRequest(oauth.config, oauth.discovery)
-    const spotifyAuthMutation = trpc.auth.withSpotify.useMutation()
+    const spotifyAuthMutation = trpc.auth.withSpotify.useMutation({
+        onError: (err) => {
+            console.error("withSpotify failed:", err);
+        },
+    })
     const session = useSession()
 
     useEffect(() => {
