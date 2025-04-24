@@ -15,6 +15,7 @@ export const authRouter = router({
             const spotify = SpotifyApi.withAccessToken(process.env.SPOTIFY_CLIENT_ID!, tokens)
 
             const profile = await spotify.currentUser.profile()
+            const defaultAvatar = "https://scdn.co/image/ab67616d00001e02d65f098bb706fd41191521ba"
             const user = await orm.em.upsert(new User(profile.id, profile.images[0]?.url))
 
             const jwt = await new SignJWT()

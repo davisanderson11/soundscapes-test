@@ -1,5 +1,5 @@
 import Mapbox, { MapView, LocationPuck, PointAnnotation, Camera, StyleImport } from "@rnmapbox/maps"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { trpc } from "~/utils/trpc"
 import { Text, View } from "~/components"
 import { Image, Pressable } from "react-native"
@@ -16,21 +16,34 @@ export default function MapScreen() {
     const location = useLocation()
     const session = useSession()
 
+    const fallbackCoords = undefined
     const coords = location?.coords.longitude
         ? ([location.coords.longitude, location.coords.latitude] as [number, number])
-        : null
-    if (!coords) {
-        console.log("no coords!")
-    }
+        : fallbackCoords
+
     const profile = trpc.users.me.useQuery()
     const drops = trpc.drops.scan.useQuery(coords!, { enabled: coords != null })
-    console.log("drops.features", drops.data?.length ?? 0);
+    if (drops.data) {
+        console.log("drops loaded")
+    }
 
     const router = useRouter()
     const onMarkerPress = (id: number) => router.push(`/drop-modal/${id}`)
     const [onSelected, onDeselected] = useFauxMarkers(onMarkerPress)
-    const fallbackCoords = [-98.5, 39.5] as [number, number];
-    console.log("coords: ", coords)
+    if (coords) {
+        console.log("coords")
+    }
+
+    // camera ref for imperative movements
+    const cameraRef = useRef<Camera>(null)
+    useEffect(() => {
+        if (!coords) return
+        cameraRef.current?.setCamera({
+            centerCoordinate: coords,
+            zoomLevel: 14,
+            animationDuration: 0,
+        })
+    }, [coords])
 
     return (
         <View style={{ flex: 1 }}>
@@ -38,7 +51,7 @@ export default function MapScreen() {
                 {profile.data && (
                     <Pressable onPress={session.signOut}>
                         <Image
-                            style={{ width: 50, height: 50, borderRadius: 100 }}
+                            style={{ width: 50, height: 50, borderRadius: 100, borderColor: "white" }}
                             src={profile.data.avatar}
                         />
                     </Pressable>
@@ -52,6 +65,8 @@ export default function MapScreen() {
                 style={{ flex: 1 }}
                 projection="globe"
                 styleURL="mapbox://styles/mapbox/standard"
+                onDidFinishLoadingStyle={() => console.log("style loaded")}
+                onDidFinishLoadingMap={()=>console.log("map loaded")}
             >
                 {drops.isSuccess &&
                     drops.data.map(drop => (
@@ -66,18 +81,20 @@ export default function MapScreen() {
                                 style={{
                                     backgroundColor: drop.special ? "red" : "blue",
                                     width: 24,
-                                    height: 24
+                                    height: 24,
                                 }}
                             >
                                 <Text>{drop.id}</Text>
                             </View>
                         </PointAnnotation>
                     ))}
+
                 <StyleImport id="basemap" existing config={{ lightPreset: "night" }} />
                 <Camera
+                    ref={cameraRef}
                     zoomLevel={14}
                     animationDuration={0}
-                    centerCoordinate={coords ?? undefined}
+                    pitch={60}
                 />
                 <LocationPuck
                     puckBearingEnabled

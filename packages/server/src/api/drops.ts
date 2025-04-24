@@ -64,7 +64,7 @@ export const dropsRouter = router({
         const offset = Math.floor(Math.random() * 500)
         const { tracks } = await spotifyClient.search(letter, ["track"], undefined, 1, offset)
         const track = tracks.items[0]
-        const album = await spotifyClient.albums.get(track.album.id)
+        const album = track.album ? await spotifyClient.albums.get(track.album.id) : null
 
         cache.set(userDropKey, null, DROP_COOLDOWN_SEC)
         return { track, album }
