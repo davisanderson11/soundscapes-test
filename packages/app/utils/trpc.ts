@@ -23,7 +23,7 @@ const host =
   Constants.expoConfig?.hostUri?.split(":")[0] ??           // 2
   fallbackHost;                                             // 3
 
-export const apiURL = `http://${host}/trpc`;
+export const apiURL = `http://${host}:3000/trpc`;
 console.log("🔗 trpc apiURL =>", apiURL);
 
 /* ------------------------------------------------------------------

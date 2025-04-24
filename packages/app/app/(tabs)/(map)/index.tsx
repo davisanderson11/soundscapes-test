@@ -19,13 +19,18 @@ export default function MapScreen() {
     const coords = location?.coords.longitude
         ? ([location.coords.longitude, location.coords.latitude] as [number, number])
         : null
-
+    if (!coords) {
+        console.log("no coords!")
+    }
     const profile = trpc.users.me.useQuery()
     const drops = trpc.drops.scan.useQuery(coords!, { enabled: coords != null })
+    console.log("drops.features", drops.data?.length ?? 0);
 
     const router = useRouter()
     const onMarkerPress = (id: number) => router.push(`/drop-modal/${id}`)
     const [onSelected, onDeselected] = useFauxMarkers(onMarkerPress)
+    const fallbackCoords = [-98.5, 39.5] as [number, number];
+    console.log("coords: ", coords)
 
     return (
         <View style={{ flex: 1 }}>
