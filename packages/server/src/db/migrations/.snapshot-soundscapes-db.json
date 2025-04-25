@@ -9,7 +9,7 @@
         "id": {
           "name": "id",
           "type": "serial",
-          "unsigned": true,
+          "unsigned": false,
           "autoincrement": true,
           "primary": true,
           "nullable": false,
@@ -57,7 +57,7 @@
         "id": {
           "name": "id",
           "type": "serial",
-          "unsigned": true,
+          "unsigned": false,
           "autoincrement": true,
           "primary": true,
           "nullable": false,
@@ -136,7 +136,7 @@
         "id": {
           "name": "id",
           "type": "serial",
-          "unsigned": true,
+          "unsigned": false,
           "autoincrement": true,
           "primary": true,
           "nullable": false,

@@ -8,7 +8,7 @@ import { SpotifyApi } from "@spotify/web-api-ts-sdk"
 import { cache } from "~/cache"
 
 const SCAN_R_KM = 1
-const DROP_COOLDOWN_SEC = 2 * 60 * 60
+const DROP_COOLDOWN_SEC = 2 //2 * 60 * 60
 
 export const spotifyClient = SpotifyApi.withClientCredentials(
     process.env.SPOTIFY_CLIENT_ID!,
