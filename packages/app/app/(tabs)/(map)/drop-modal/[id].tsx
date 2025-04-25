@@ -20,7 +20,9 @@ export default function DropModal() {
                         style={{ width: 200, height: 200 }}
                         src={openMutation.data.album.images[0].url}
                     />
-                    <Text>{openMutation.data.track.name}</Text>
+                    <Text style = {{color: 'red'}}>{openMutation.data.track.name}</Text>
+                    <Text style = {{color: 'red'}}>{openMutation.data.value}</Text>
+                    <Text style = {{color: 'red'}}>{openMutation.data.testQuality}</Text>
                 </>
             )}
         </View>
