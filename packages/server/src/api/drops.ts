@@ -15,16 +15,6 @@ export const spotifyClient = SpotifyApi.withClientCredentials(
     process.env.SPOTIFY_CLIENT_SECRET!
 )
 
-enum Quality {
-    a = 0,
-    b = 1,
-    c = 2,
-    d = 3,
-    e = 4,
-    f = 5,
-    g = 6, 
-}
-
 export const dropsRouter = router({
     scan: authedProcedure
         .input(z.tuple([z.number(), z.number()]))
@@ -76,7 +66,7 @@ export const dropsRouter = router({
         const track = tracks.items[0]
         const album = track.album ? await spotifyClient.albums.get(track.album.id) : null
         const value = Math.round(Math.random() * 100); // TODO: Value same for every identical song
-        const testQuality = Quality[Math.round(Math.random() * 6)] // TODO: Rarity "curve"
+        const testQuality = Math.round(Math.random() * 50) // TODO: Rarity "curve"
 
         cache.set(userDropKey, null, DROP_COOLDOWN_SEC)
         return { track, album, value, testQuality }
