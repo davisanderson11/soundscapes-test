@@ -21,6 +21,7 @@ export default function DropModal() {
                         src={openMutation.data.album.images[0].url}
                     />
                     <Text style = {{color: 'red'}}>{openMutation.data.track.name}</Text>
+                    <Text style = {{color: 'red'}}>{openMutation.data?.artist}</Text>
                     <Text style = {{color: 'red'}}>Test Value: {openMutation.data.value}</Text>
                     <Text style = {{color: 'red'}}>Test Quality: {openMutation.data.testQuality}</Text>
                 </>

@@ -65,11 +65,12 @@ export const dropsRouter = router({
         const { tracks } = await spotifyClient.search(letter, ["track"], undefined, 1, offset)
         const track = tracks.items[0]
         const album = track.album ? await spotifyClient.albums.get(track.album.id) : null
+        const artist = track.artists?.[0]?.name?? ""
         const value = Math.round(Math.random() * 100); // TODO: Value same for every identical song
         const testQuality = Math.round(Math.random() * 50) // TODO: Rarity "curve"
 
         cache.set(userDropKey, null, DROP_COOLDOWN_SEC)
-        return { track, album, value, testQuality }
+        return { track, album, value, testQuality, artist }
     })
 })
 

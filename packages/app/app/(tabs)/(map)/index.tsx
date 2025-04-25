@@ -10,6 +10,23 @@ import { useFauxMarkers } from "~/hooks/useFauxMarkers"
 
 void Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN!)
 
+const presetMap: Record<number, string> = {
+    5:  "dawn",
+    8:  "day",
+    18: "dusk",
+    20: "night",    
+  }
+
+const hour = new Date().getHours()
+const time = Object
+  .keys(presetMap)
+  .map(Number)
+  .sort((a,b) => a - b)
+  .reduce(
+    (acc,from) => hour >= from ? presetMap[from] : acc,
+    "night"
+  )
+
 export default function MapScreen() {
     useEffect(() => Mapbox.setTelemetryEnabled(false), [])
 
@@ -65,8 +82,6 @@ export default function MapScreen() {
                 style={{ flex: 1 }}
                 projection="globe"
                 styleURL="mapbox://styles/mapbox/standard"
-                onDidFinishLoadingStyle={() => console.log("style loaded")}
-                onDidFinishLoadingMap={()=>console.log("map loaded")}
             >
                 {drops.isSuccess &&
                     drops.data.map(drop => (
@@ -89,12 +104,12 @@ export default function MapScreen() {
                         </PointAnnotation>
                     ))}
 
-                <StyleImport id="basemap" existing config={{ lightPreset: "night" }} />
+                <StyleImport id="basemap" existing config={{ lightPreset: time }} />
                 <Camera
                     ref={cameraRef}
                     zoomLevel={14}
                     animationDuration={0}
-                    pitch={60}
+                    // TODO: Setting for 3D (pitch={45})
                 />
                 <LocationPuck
                     puckBearingEnabled
