@@ -22,7 +22,7 @@ export default function DropModal() {
                     />
                     <Text style = {{color: 'red'}}>{openMutation.data.track.name}</Text>
                     <Text style = {{color: 'red'}}>{openMutation.data?.artist}</Text>
-                    <Text style = {{color: 'red'}}>Test Value: {openMutation.data.value}</Text>
+                    <Text style = {{color: 'red'}}>Test Value: {openMutation.data.track.popularity}</Text> {/* TODO: Decide how tf to determine value, maybe popularity maybe random? */}
                     <Text style = {{color: 'red'}}>Test Quality: {openMutation.data.testQuality}</Text>
                 </>
             )}
